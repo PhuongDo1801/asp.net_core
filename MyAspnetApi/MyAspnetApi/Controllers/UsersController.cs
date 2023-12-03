@@ -44,7 +44,7 @@ namespace MyAspnetApi.Controllers
             });
         }
 
-            bool IsValidEmail(string email)
+        bool IsValidEmail(string email)
         {   
             var trimmedEmail = email.Trim();
             if (trimmedEmail.EndsWith(".")){
@@ -59,6 +59,20 @@ namespace MyAspnetApi.Controllers
             {
                 return false;
             }
+        }
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(UserCreateDto userCreateDto)
+        {
+            var result = await _userService.Register(userCreateDto);
+
+            return StatusCode(StatusCodes.Status200OK, result);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(UserLoginDto userLoginDto)
+        {
+            var result = await _userService.Login(userLoginDto);
+            return StatusCode(StatusCodes.Status200OK, result);
         }
     }
 }

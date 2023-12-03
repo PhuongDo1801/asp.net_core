@@ -16,6 +16,7 @@ namespace MyAspnetCore.Mappers
             CreateMap<User, UserDto>();
             CreateMap<UserCreateDto, User>();
             CreateMap<UserUpdateDto, User>();
+            CreateMap<UserLoginDto, User>();
         }
     }
 }

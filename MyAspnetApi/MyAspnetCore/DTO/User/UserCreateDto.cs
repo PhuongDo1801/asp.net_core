@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MyAspnetCore.Resources;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -16,12 +17,12 @@ namespace MyAspnetCore.DTO.User
         /// <summary>
         /// Tên người dùng
         /// </summary>
-        [Required]
+        [Required(ErrorMessageResourceType = typeof(ResourceVN), ErrorMessageResourceName = nameof(ResourceVN.UserNameNotEmpty))]
         public string UserName { get; set; }
         /// <summary>
         /// Email
         /// </summary>
-        [Required]
+        [Required(ErrorMessageResourceType = typeof(ResourceVN), ErrorMessageResourceName = nameof(ResourceVN.EmailNotEmpty))]
         public string Email { get; set; }
         /// <summary>
         /// SĐT
@@ -34,7 +35,7 @@ namespace MyAspnetCore.DTO.User
         /// <summary>
         /// Password
         /// </summary>
-        [Required]
+        [Required(ErrorMessageResourceType = typeof(ResourceVN), ErrorMessageResourceName = nameof(ResourceVN.PasswordNotEmpty))]
         public string Password { get; set; }
         /// <summary>
         /// DoB

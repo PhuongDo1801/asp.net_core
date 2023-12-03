@@ -61,6 +61,24 @@ namespace MyAspnetCore.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Email đã tồn tại.
+        /// </summary>
+        public static string EmailExist {
+            get {
+                return ResourceManager.GetString("EmailExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email không được để trống.
+        /// </summary>
+        public static string EmailNotEmpty {
+            get {
+                return ResourceManager.GetString("EmailNotEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Có lỗi xảy ra vui lòng liên hệ HUST để được trợ giúp.
         /// </summary>
         public static string Err_Exception {
@@ -93,6 +111,51 @@ namespace MyAspnetCore.Resources {
         public static string Err_ValidateData {
             get {
                 return ResourceManager.GetString("Err_ValidateData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ngày sing không hợp lệ.
+        /// </summary>
+        public static string InvalidDob {
+            get {
+                return ResourceManager.GetString("InvalidDob", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email không hợp lệ.
+        /// </summary>
+        public static string InvalidEmail {
+            get {
+                return ResourceManager.GetString("InvalidEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tài khoản hoặc mật khẩu không chính xác.
+        /// </summary>
+        public static string NotFoundAcc {
+            get {
+                return ResourceManager.GetString("NotFoundAcc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mật khẩu không được để trống.
+        /// </summary>
+        public static string PasswordNotEmpty {
+            get {
+                return ResourceManager.GetString("PasswordNotEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tên không được để trống.
+        /// </summary>
+        public static string UserNameNotEmpty {
+            get {
+                return ResourceManager.GetString("UserNameNotEmpty", resourceCulture);
             }
         }
     }
