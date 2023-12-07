@@ -112,5 +112,18 @@ namespace MyAspnetCore.Services
 
             return true;
         }
+
+        public async Task<UserDto> GetByEmail(string email)
+        {
+            var user = await _userRepository.GetByEmail(email);
+            if (user == null)
+            {
+                throw new NotFoundException(new List<string> { ResourceVN.Err_NotFound });
+            }
+
+            var entityDto = _mapper.Map<UserDto>(user);
+
+            return entityDto;
+        }
     }
 }

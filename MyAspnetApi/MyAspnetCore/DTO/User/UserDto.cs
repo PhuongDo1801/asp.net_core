@@ -55,11 +55,11 @@ namespace MyAspnetCore.DTO.User
         /// <summary>
         /// ngày sửa
         /// </summary>
-        public DateTime? ModifiedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
         /// <summary>
         /// người sửa
         /// </summary>
-        public string? ModifiedBy { get; set; }
+        public string? UpdatedBy { get; set; }
     }
 
 }

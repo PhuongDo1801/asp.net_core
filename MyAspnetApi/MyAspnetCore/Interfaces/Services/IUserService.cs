@@ -15,5 +15,7 @@ namespace MyAspnetCore.Interfaces.Services
         public Task<int> Register(UserCreateDto userCreateDto);
 
         public Task<bool> Login(UserLoginDto userLoginDto);
+
+        public Task<UserDto> GetByEmail(string email);
     }
 }

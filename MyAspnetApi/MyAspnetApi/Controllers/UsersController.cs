@@ -43,23 +43,6 @@ namespace MyAspnetApi.Controllers
                 Data = users
             });
         }
-
-        bool IsValidEmail(string email)
-        {   
-            var trimmedEmail = email.Trim();
-            if (trimmedEmail.EndsWith(".")){
-                return false;
-            }
-            try
-            {
-                var addr = new System.Net.Mail.MailAddress(email);
-                return addr.Address == trimmedEmail;
-            }
-            catch 
-            {
-                return false;
-            }
-        }
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserCreateDto userCreateDto)
         {
@@ -73,6 +56,13 @@ namespace MyAspnetApi.Controllers
         {
             var result = await _userService.Login(userLoginDto);
             return StatusCode(StatusCodes.Status200OK, result);
+        }
+
+        [HttpGet("GetByEmail")]
+        public async Task<IActionResult> GetByEmail(string email)
+        {
+            var user = await _userService.GetByEmail(email);
+            return StatusCode(StatusCodes.Status200OK, user);
         }
     }
 }

@@ -1,3 +1,8 @@
+using Amazon.BCMDataExports;
+using Amazon.Budgets;
+using Amazon.CostAndUsageReport;
+using Amazon.CostExplorer;
+using Amazon.Pricing;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -48,6 +53,12 @@ builder.Services.AddControllers()
     });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<AmazonCostExplorerClient>();
+builder.Services.AddAWSService<AmazonBCMDataExportsClient>();
+builder.Services.AddAWSService<AmazonBudgetsClient>();
+builder.Services.AddAWSService<AmazonCostAndUsageReportClient>();
+builder.Services.AddAWSService<AmazonPricingClient>();
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
@@ -76,7 +87,8 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
-
+builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
+builder.Services.AddScoped<IProviderService, ProviderService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyAllowedOrigins",

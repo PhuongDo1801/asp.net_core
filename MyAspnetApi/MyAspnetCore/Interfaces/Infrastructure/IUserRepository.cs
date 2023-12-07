@@ -19,5 +19,7 @@ namespace MyAspnetCore.Interfaces.Infrastructure
 
         Task<bool> IsExistEmail(string email);
 
+        Task<User> GetByEmail(string email);
+
     }
 }

@@ -19,6 +19,18 @@ namespace MyAspnetInfrastructure.Repository
         {
         }
 
+        public async Task<User> GetByEmail(string email)
+        {
+            using(connection = new MySqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+                var parameters = new DynamicParameters();
+                parameters.Add("@p_Email", email);
+                var user = await connection.QueryFirstOrDefaultAsync<User>("Proc_User_GetByEmail", parameters, commandType: CommandType.StoredProcedure);
+                return user;
+            }
+        }
+
         public async Task<(int, IEnumerable<User>)> GetListAsync(string? queryName, int? recordsPerPage, int? page)
         {
             using(connection = new MySqlConnection(connectionString))
