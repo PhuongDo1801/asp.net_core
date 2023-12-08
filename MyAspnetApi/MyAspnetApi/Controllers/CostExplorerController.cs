@@ -57,7 +57,7 @@ namespace MyAspnetApi.Controllers
                 // Ví dụ: Trả về dữ liệu dưới dạng JSON
                 return Ok(response);
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
                 // Xử lý lỗi và trả về mã lỗi
                 return StatusCode(500, new { ErrorMessage = ex.Message });
