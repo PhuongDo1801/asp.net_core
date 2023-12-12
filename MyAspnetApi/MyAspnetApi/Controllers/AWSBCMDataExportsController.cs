@@ -5,7 +5,7 @@ namespace MyAspnetApi.Controllers
 {
     [Route("api/v1/[controller]")] 
     [ApiController]
-    public class BCMDataExportsController : ControllerBase
+    public class AWSBCMDataExportsController : ControllerBase
     {
     }
 }
