@@ -1,3 +1,4 @@
+using Amazon.AWSSupport;
 using Amazon.BCMDataExports;
 using Amazon.Budgets;
 using Amazon.CostAndUsageReport;
@@ -63,7 +64,9 @@ builder.Services.AddAWSService<AmazonEC2Client>();
 builder.Services.AddAWSService<AmazonBudgetsClient>();
 builder.Services.AddAWSService<AmazonCostAndUsageReportClient>();
 builder.Services.AddAWSService<AmazonPricingClient>();
+builder.Services.AddAWSService<AmazonAWSSupportClient>();
 builder.Services.AddAWSService<AmazonSavingsPlansClient>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme

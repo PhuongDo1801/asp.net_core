@@ -44,7 +44,7 @@ namespace MyAspnetCore.DTO.User
         /// <summary>
         /// Vai trò người dùng
         /// </summary>
-        public int Role { get; set; }
+        public string Role { get; set; }
         /// <summary>
         /// ngày tạo
         /// </summary>

@@ -16,7 +16,7 @@ namespace MyAspnetCore.DTO.User
         /// <summary>
         /// Tên người dùng
         /// </summary>
-        [Required]
+        //[Required]
         public string UserName { get; set; }
         /// <summary>
         /// Email
@@ -34,8 +34,8 @@ namespace MyAspnetCore.DTO.User
         /// <summary>
         /// Password
         /// </summary>
-        [Required]
-        public string Password { get; set; }
+        //[Required]
+        //public string Password { get; set; }
         /// <summary>
         /// DoB
         /// </summary>
@@ -43,7 +43,10 @@ namespace MyAspnetCore.DTO.User
         /// <summary>
         /// Vai trò người dùng
         /// </summary>
-        public int Role { get; set; }
+        public string Role { get; set; }
+        public string RefreshToken { get; set; } = string.Empty;
+        public DateTime TokenCreated { get; set; }
+        public DateTime TokenExpires { get; set; }
         /// <summary>
         /// ngày tạo
         /// </summary>

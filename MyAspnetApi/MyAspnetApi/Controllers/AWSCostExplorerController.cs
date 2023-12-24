@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Amazon;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq;
+using MyAspnetCore.Entities;
 
 namespace MyAspnetApi.Controllers
 {
@@ -54,7 +55,7 @@ namespace MyAspnetApi.Controllers
                     //        Values = new List<string> { "AWS Cost Explorer" }
                     //    }
                     //},
-                    Metrics = new List<string> { "BlendedCost", "UnblendedCost" },
+                    Metrics = new List<string> { "BlendedCost" },
                     GroupBy = new List<GroupDefinition>
                         {
                             new GroupDefinition
@@ -164,7 +165,7 @@ namespace MyAspnetApi.Controllers
                         End = endDate.ToString("yyyy-MM-dd")
                     },
                     Granularity = Granularity.MONTHLY,
-                    Metrics = new List<string> { "BlendedCost", "UnblendedCost" },
+                    Metrics = new List<string> { "BlendedCost"},
                     GroupBy = new List<GroupDefinition>
                         {
                             new GroupDefinition
@@ -179,6 +180,70 @@ namespace MyAspnetApi.Controllers
                 var response = await _costExplorerClient.GetCostAndUsageAsync(request);
 
                 return Ok(response.ResultsByTime);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+        [HttpGet("get-monthly-cost-and-service")]
+        public async Task<IActionResult> GetMonthlyCostAndService()
+        {
+            try
+            {
+                var startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+
+                var request = new Amazon.CostExplorer.Model.GetCostAndUsageRequest
+                {
+                    TimePeriod = new Amazon.CostExplorer.Model.DateInterval
+                    {
+                        Start = startDate.ToString("yyyy-MM-dd"),
+                        End = endDate.ToString("yyyy-MM-dd")
+                    },
+                    Granularity = Granularity.MONTHLY,
+                    Metrics = new List<string> { "BlendedCost" },
+                    GroupBy = new List<GroupDefinition>
+                        {
+                            new GroupDefinition
+                            {
+                                Key = "SERVICE",
+                                Type = GroupDefinitionType.DIMENSION,
+                            },
+                        },
+                };
+
+                var response = await _costExplorerClient.GetCostAndUsageAsync(request);
+
+                // Xử lý dữ liệu trả về
+                var result = response.ResultsByTime.FirstOrDefault();
+                if (result != null)
+                {
+                    var groups = result.Groups;
+
+                    // Tạo danh sách chi phí
+                    var costList = new List<CostInfo>();
+
+                    foreach (var group in groups)
+                    {
+                        var serviceName = group.Keys.FirstOrDefault();
+                        var blendedCost = group.Metrics["BlendedCost"].Amount;
+
+                        var costInfo = new CostInfo
+                        {
+                            ServiceName = serviceName,
+                            BlendedCost = blendedCost
+                        };
+
+                        costList.Add(costInfo);
+                    }
+
+                    return Ok(costList);
+                }
+                else
+                {
+                    return BadRequest("Không có dữ liệu");
+                }
             }
             catch (Exception ex)
             {
@@ -207,7 +272,7 @@ namespace MyAspnetApi.Controllers
                         End = endDate.ToString("yyyy-MM-dd")
                     },
                     Granularity = Granularity.MONTHLY,
-                    Metrics = new List<string> { "BlendedCost", "UnblendedCost" },
+                    Metrics = new List<string> { "BlendedCost" },
                     GroupBy = new List<GroupDefinition>
                         {
                             new GroupDefinition
@@ -221,7 +286,126 @@ namespace MyAspnetApi.Controllers
 
                 var response = await _costExplorerClient.GetCostAndUsageAsync(request);
 
-                return Ok(response.ResultsByTime);
+                var relevantData = response.ResultsByTime
+                .Select(result => new
+                {
+                    TimePeriod = result.TimePeriod,
+                    TotalCost = result.Groups.Sum(group =>
+                        Convert.ToDouble(group.Metrics["BlendedCost"].Amount))
+                })
+                .ToList();
+
+                return Ok(relevantData);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("history-cost-data")]
+        public async Task<IActionResult> GetHistoryCostData([FromQuery(Name = "startDate")] DateTime startDate,
+                                                                [FromQuery(Name = "endDate")] DateTime endDate)
+        {
+            try
+            {
+                var request = new GetCostAndUsageRequest
+                {
+                    TimePeriod = new DateInterval
+                    {
+                        Start = startDate.ToString("yyyy-MM-dd"),
+                        End = endDate.ToString("yyyy-MM-dd"),
+                    },
+                    Granularity = Granularity.MONTHLY,
+                    //Filter = new Expression
+                    //{
+                    //    Dimensions = new DimensionValues
+                    //    {
+                    //        Key = "SERVICE",
+                    //        Values = new List<string> { "AWS Cost Explorer" }
+                    //    }
+                    //},
+                    Metrics = new List<string> { "BlendedCost" },
+                    GroupBy = new List<GroupDefinition>
+                        {
+                            new GroupDefinition
+                            {
+                                Key = "SERVICE",
+                                Type = GroupDefinitionType.DIMENSION,
+                            },
+                        },
+                };
+
+                var response = await _costExplorerClient.GetCostAndUsageAsync(request);
+
+                // Xử lý dữ liệu response ở đây...
+                // Ví dụ: Trả về dữ liệu dưới dạng JSON
+                var relevantData = response.ResultsByTime
+                .Select(result => new
+                {
+                    TimePeriod = result.TimePeriod,
+                    TotalCost = result.Groups.Sum(group =>
+                        Convert.ToDouble(group.Metrics["BlendedCost"].Amount))
+                })
+                .ToList();
+
+                return Ok(relevantData);
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi và trả về mã lỗi
+                return StatusCode(500, new { ErrorMessage = ex.Message });
+            }
+        }
+
+        [HttpGet("get-last-six-months-cost-and-service")]
+        public async Task<IActionResult> GetLastSixMonthsCostAndService()
+        {
+            try
+            {
+                var today = DateTime.Today;
+                var startDate = today.AddMonths(-5);
+                startDate = new DateTime(startDate.Year, startDate.Month, 1);
+                var endDate = today;
+
+                var request = new Amazon.CostExplorer.Model.GetCostAndUsageRequest
+                {
+                    TimePeriod = new Amazon.CostExplorer.Model.DateInterval
+                    {
+                        Start = startDate.ToString("yyyy-MM-dd"),
+                        End = endDate.ToString("yyyy-MM-dd")
+                    },
+                    Granularity = Granularity.MONTHLY,
+                    Metrics = new List<string> { "BlendedCost" },
+                    GroupBy = new List<GroupDefinition>
+                        {
+                            new GroupDefinition
+                            {
+                                Key = "SERVICE",
+                                Type = GroupDefinitionType.DIMENSION,
+                            },
+                        },
+                    // Thêm các Metrics khác tùy thuộc vào nhu cầu của bạn
+                };
+
+                var response = await _costExplorerClient.GetCostAndUsageAsync(request);
+
+
+                var resultData = response.ResultsByTime.Select(result => new
+                {
+                    TimePeriod = result.TimePeriod,
+                    TotalCost = result.Groups.Sum(group =>
+                        Convert.ToDouble(group.Metrics["BlendedCost"].Amount)),
+                    Services = result.Groups.Select(group => new
+                    {
+                        ServiceName = group.Keys.FirstOrDefault(),
+                        Cost = group.Metrics["BlendedCost"].Amount
+                    })
+                }).ToList();
+
+                return Ok(resultData);
+
             }
             catch (Exception ex)
             {

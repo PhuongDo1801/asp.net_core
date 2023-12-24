@@ -14,8 +14,14 @@ namespace MyAspnetCore.Interfaces.Services
 
         public Task<int> Register(UserCreateDto userCreateDto);
 
-        public Task<bool> Login(UserLoginDto userLoginDto);
+        public Task<UserDto> Login(UserLoginDto userLoginDto);
 
         public Task<UserDto> GetByEmail(string email);
+
+        public Task<string> HashPassword(string password);
+
+        public Task<bool> VerifyPassword(string password, string passwordHash);
+
+        public Task<UserDto> GetUserInfo();
     }
 }

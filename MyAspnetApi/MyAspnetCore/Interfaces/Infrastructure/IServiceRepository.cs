@@ -9,6 +9,6 @@ namespace MyAspnetCore.Interfaces.Infrastructure
 {
     public interface IServiceRepository : IBaseRepository<Service>
     {
-
+        Task<(int, IEnumerable<Service>)> GetListAsync(string? queryName, int? recordsPerPage, int? page);
     }
 }

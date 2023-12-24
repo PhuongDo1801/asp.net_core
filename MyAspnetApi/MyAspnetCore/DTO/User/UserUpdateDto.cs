@@ -32,18 +32,13 @@ namespace MyAspnetCore.DTO.User
         /// </summary>
         public string IdentityNumber { get; set; }
         /// <summary>
-        /// Password
-        /// </summary>
-        [Required]
-        public string Password { get; set; }
-        /// <summary>
         /// DoB
         /// </summary>
         public DateTime? DateOfBirth { get; set; }
         /// <summary>
         /// Vai trò người dùng
         /// </summary>
-        public int Role { get; set; }
+        public string Role { get; set; }
         /// <summary>
         /// ngày sửa
         /// </summary>

@@ -102,13 +102,13 @@ namespace MyAspnetApi.Controllers
                     if (pricePerUnit != null)
                     {
                         // Tính giá theo đơn vị GB-month
-                        var pricePerGBMonth = double.Parse(pricePerUnit);
+                        var pricePerUnits = double.Parse(pricePerUnit);
 
                         // Xử lý dữ liệu khác nếu cần thiết
                         var description = priceDimensions?.Values().FirstOrDefault()?["description"]?.Value<string>();
 
 
-                        return Ok(new { Description = description, PricePerGBMonth = pricePerGBMonth });
+                        return Ok(new { Description = description, pricePerUnit = pricePerUnits });
                     }
                     else
                     {
@@ -151,6 +151,56 @@ namespace MyAspnetApi.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal Server Error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("ServiceDetails")]
+        public async Task<IActionResult> GetServiceDetails([FromQuery] string service)
+        {
+            try
+            {
+                var serviceRequest = new GetProductsRequest
+                {
+                    ServiceCode = service,
+                    FormatVersion = "aws_v1",
+                    MaxResults = 1
+                };
+
+                var serviceResponse = await _pricingClient.GetProductsAsync(serviceRequest);
+
+                if (serviceResponse.PriceList.Count > 0)
+                {
+
+                    var productJson = serviceResponse.PriceList[0];
+                    var product = JObject.Parse(productJson)["product"];
+                    var attributes = product["attributes"];
+
+                    var result = new
+                    {
+                        serviceCode = attributes["servicecode"]?.Value<string>(),
+                        productFamily = product["productFamily"]?.Value<string>(),
+                        engineCode = attributes?["engineCode"]?.Value<string>(),
+                        //regionCode = attributes?["regionCode"]?.Value<string>(),
+                        usagetype = attributes?["usagetype"]?.Value<string>(),
+                        locationType = attributes?["locationType"]?.Value<string>(),
+                        //location = attributes?["location"]?.Value<string>(),
+                        serviceName = attributes?["servicename"]?.Value<string>(),
+                        instanceFamily = attributes?["instanceFamily"]?.Value<string>(),
+                        operation = attributes?["operation"]?.Value<string>(),
+                        databaseEngine = attributes?["databaseEngine"]?.Value<string>(),
+                        //sku = product["sku"]?.Value<string>()
+                    };
+
+                    return Ok(result);
+                }
+                else
+                {
+                    return NotFound(new { ErrorMessage = "Không tìm thấy thông tin cho dịch vụ đã cho." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { ErrorMessage = ex.Message });
             }
         }
     }

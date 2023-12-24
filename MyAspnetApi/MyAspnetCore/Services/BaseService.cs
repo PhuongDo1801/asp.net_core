@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using MyAspnetCore.Exceptions;
 using MyAspnetCore.Interfaces.Infrastructure;
 using MyAspnetCore.Interfaces.Services;
@@ -60,7 +61,7 @@ namespace MyAspnetCore.Services
             return entityDto;
         }
 
-        public async Task<int> InsertAsync(TEntityCreateDto entityCreateDto)
+        public virtual async Task<int> InsertAsync(TEntityCreateDto entityCreateDto)
         {
             var entity = _mapper.Map<TEntity>(entityCreateDto);
             var properties = entity.GetType().GetProperties();
@@ -91,7 +92,7 @@ namespace MyAspnetCore.Services
             return result;
         }
 
-        public async Task<int> UpdateAsync(TEntityUpdateDto entityeUpdateDto, Guid Id)
+        public virtual async Task<int> UpdateAsync(TEntityUpdateDto entityeUpdateDto, Guid Id)
         {
             var check = await _baseRepository.GetByIdAsync(Id);
 
