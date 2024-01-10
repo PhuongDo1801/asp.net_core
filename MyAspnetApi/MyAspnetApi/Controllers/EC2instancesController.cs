@@ -3,8 +3,10 @@ using Amazon.CostExplorer;
 using Amazon.EC2;
 using Amazon.EC2.Model;
 using Amazon.Runtime;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MyAspnetCore.Interfaces.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -12,20 +14,41 @@ namespace MyAspnetApi.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public class EC2instancesController : ControllerBase
     {
-        private readonly IAmazonEC2 _ec2client;
+        private IAmazonEC2 _ec2client;
         private readonly IConfiguration _configuration;
+        private readonly IUserService _userService;
 
-        public EC2instancesController(IConfiguration configuration)
+        public EC2instancesController(IConfiguration configuration, IUserService userService)
         {
             _configuration = configuration;
-            var accessKey = _configuration.GetValue<string>("AWS:AccessKey");
-            var secretKey = _configuration.GetValue<string>("AWS:SecretKey");
-            var credentials = new BasicAWSCredentials(accessKey, secretKey); // Sử dụng IAM Role
-            var regionEndpoint = RegionEndpoint.USEast1; // Thay đổi region endpoint tại đây
-            _ec2client = new AmazonEC2Client(credentials, regionEndpoint);
+            _userService = userService;
+            Initialize().Wait();
+        }
+        private async Task Initialize()
+        {
+            var user = await _userService.GetUserInfo(); ;
+            if (user != null)
+            {
+                _ec2client = InitializeClient(user.AccessKey, user.SecretKey);
+            }
+        }
+        private IAmazonEC2 InitializeClient(string accessKey, string secretKey)
+        {
+            if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
+            {
+                var credentials = new BasicAWSCredentials(accessKey, secretKey);
+                var regionEndpoint = RegionEndpoint.USEast1; // Thay đổi region endpoint tại đây
+                return new AmazonEC2Client(credentials, regionEndpoint);
+            }
 
+            return null;
+        }
+        private bool ClientIsNull()
+        {
+            return _ec2client == null;
         }
         /// <summary>
         /// Lấy thông tin Ec2 bản thân người dùng đang sử dụng

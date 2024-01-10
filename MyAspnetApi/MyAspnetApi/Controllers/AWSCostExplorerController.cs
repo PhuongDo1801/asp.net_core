@@ -7,25 +7,49 @@ using Amazon;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq;
 using MyAspnetCore.Entities;
+using Microsoft.AspNetCore.Authorization;
+using MyAspnetCore.Interfaces.Services;
+using Amazon.Budgets;
 
 namespace MyAspnetApi.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public class AWSCostExplorerController : ControllerBase
     {
-        private readonly IAmazonCostExplorer _costExplorerClient;
+        private IAmazonCostExplorer _costExplorerClient;
         private readonly IConfiguration _configuration;
+        private readonly IUserService _userService;
 
-        public AWSCostExplorerController(IConfiguration configuration)
+        public AWSCostExplorerController(IConfiguration configuration, IUserService userService)
         {
             _configuration = configuration;
-            var accessKey = _configuration.GetValue<string>("AWS:AccessKey");
-            var secretKey = _configuration.GetValue<string>("AWS:SecretKey");
-            var credentials = new BasicAWSCredentials(accessKey, secretKey); // Sử dụng IAM Role
-            var regionEndpoint = RegionEndpoint.USEast1; // Thay đổi region endpoint tại đây
-            _costExplorerClient = new AmazonCostExplorerClient(credentials, regionEndpoint);
-            
+            _userService = userService;
+            Initialize().Wait();
+        }
+        private async Task Initialize()
+        {
+            var user = await _userService.GetUserInfo(); ;
+            if (user != null)
+            {
+                _costExplorerClient = InitializeClient(user.AccessKey, user.SecretKey);
+            }
+        }
+        private IAmazonCostExplorer InitializeClient(string accessKey, string secretKey)
+        {
+            if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
+            {
+                var credentials = new BasicAWSCredentials(accessKey, secretKey);
+                var regionEndpoint = RegionEndpoint.USEast1; // Thay đổi region endpoint tại đây
+                return new AmazonCostExplorerClient(credentials, regionEndpoint);
+            }
+
+            return null;
+        }
+        private bool ClientIsNull()
+        {
+            return _costExplorerClient == null;
         }
         /// <summary>
         /// Xem lịch sử phí sử dụng dịch vụ
@@ -33,12 +57,16 @@ namespace MyAspnetApi.Controllers
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <returns></returns>
-        [HttpGet("cost-explorer-data")]
+        [HttpPost("cost-explorer-data")]
         public async Task<IActionResult> GetCostExplorerData([FromQuery(Name = "startDate")] DateTime startDate,
                                                                 [FromQuery(Name = "endDate")] DateTime endDate)
         {
             try
             {
+                if (ClientIsNull())
+                {
+                    return BadRequest(new { ErrorMessage = "Không thể tạo budget vì thiếu thông tin key." });
+                }
                 var request = new GetCostAndUsageRequest
                 {
                     TimePeriod = new DateInterval
@@ -304,7 +332,7 @@ namespace MyAspnetApi.Controllers
             }
         }
 
-        [HttpGet("history-cost-data")]
+        [HttpPost("history-cost-data")]
         public async Task<IActionResult> GetHistoryCostData([FromQuery(Name = "startDate")] DateTime startDate,
                                                                 [FromQuery(Name = "endDate")] DateTime endDate)
         {
@@ -457,7 +485,7 @@ namespace MyAspnetApi.Controllers
             }
         }
 
-        [HttpGet("GetForecastedCosts")]
+        [HttpPost("GetForecastedCosts")]
         public async Task<IActionResult> GetForecastedCosts(DateTime startDate, DateTime endDate)
         {
             try

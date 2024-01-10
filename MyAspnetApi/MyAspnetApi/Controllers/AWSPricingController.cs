@@ -5,26 +5,51 @@ using Microsoft.AspNetCore.Mvc;
 using Amazon.Runtime;
 using Amazon;
 using Newtonsoft.Json.Linq;
+using MyAspnetCore.Interfaces.Services;
+using Amazon.CostExplorer;
+using Microsoft.AspNetCore.Authorization;
 //using Newtonsoft.Json.Linq;
 
 namespace MyAspnetApi.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public class AWSPricingController : ControllerBase
     {
-        private readonly IAmazonPricing _pricingClient;
+        private IAmazonPricing _pricingClient;
         private readonly IConfiguration _configuration;
+        private readonly IUserService _userService;
 
-        public AWSPricingController(IConfiguration configuration)
+        public AWSPricingController(IConfiguration configuration, IUserService userService)
         {
             _configuration = configuration;
-            var accessKey = _configuration.GetValue<string>("AWS:AccessKey");
-            var secretKey = _configuration.GetValue<string>("AWS:SecretKey");
-            var credentials = new BasicAWSCredentials(accessKey, secretKey); // Sử dụng IAM Role
-            var regionEndpoint = RegionEndpoint.USEast1; // Thay đổi region endpoint tại đây
-            _pricingClient = new AmazonPricingClient(credentials, regionEndpoint);
+            _userService = userService;
+            Initialize().Wait();
 
+        }
+        private async Task Initialize()
+        {
+            var user = await _userService.GetUserInfo(); ;
+            if (user != null)
+            {
+                _pricingClient = InitializeClient(user.AccessKey, user.SecretKey);
+            }
+        }
+        private IAmazonPricing InitializeClient(string accessKey, string secretKey)
+        {
+            if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
+            {
+                var credentials = new BasicAWSCredentials(accessKey, secretKey);
+                var regionEndpoint = RegionEndpoint.USEast1; // Thay đổi region endpoint tại đây
+                return new AmazonPricingClient(credentials, regionEndpoint);
+            }
+
+            return null;
+        }
+        private bool ClientIsNull()
+        {
+            return _pricingClient == null;
         }
         /// <summary>
         /// Lấy thông tin về giá của instance Ec2
