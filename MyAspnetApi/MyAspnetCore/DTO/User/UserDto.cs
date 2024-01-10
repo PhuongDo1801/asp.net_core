@@ -44,9 +44,12 @@ namespace MyAspnetCore.DTO.User
         /// Vai trò người dùng
         /// </summary>
         public string Role { get; set; }
-        public string RefreshToken { get; set; } = string.Empty;
+        public string RefreshToken { get; set; }
         public DateTime TokenCreated { get; set; }
         public DateTime TokenExpires { get; set; }
+        public string AwsId { get; set; }
+        public string SecretKey { get; set; }
+        public string AccessKey { get; set; }
         /// <summary>
         /// ngày tạo
         /// </summary>

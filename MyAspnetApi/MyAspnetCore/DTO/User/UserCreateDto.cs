@@ -45,6 +45,9 @@ namespace MyAspnetCore.DTO.User
         /// Vai trò người dùng
         /// </summary>
         public string Role { get; set; }
+        public string AwsId { get; set; }
+        public string SecretKey { get; set; }
+        public string AccessKey { get; set; }
         /// <summary>
         /// ngày tạo
         /// </summary>
