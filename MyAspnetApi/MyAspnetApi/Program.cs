@@ -66,6 +66,7 @@ builder.Services.AddAWSService<AmazonCostAndUsageReportClient>();
 builder.Services.AddAWSService<AmazonPricingClient>();
 builder.Services.AddAWSService<AmazonAWSSupportClient>();
 builder.Services.AddAWSService<AmazonSavingsPlansClient>();
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -106,11 +107,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy("MyAllowedOrigins",
         policy =>
         {
-            policy.WithOrigins("http://localhost:8080") // note the port is included 
+            policy.AllowAnyOrigin()// note the port is included 
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
 });
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
 var app = builder.Build();
 app.UseCors("MyAllowedOrigins");
 

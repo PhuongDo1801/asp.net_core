@@ -1,0 +1,20 @@
+
+{
+    "region" : "us-east-1",
+    "profile" : "default",
+    "configuration" : "Release",
+    "framework"     : "net6.0",
+    "function-name" : "aspnet",
+    "package-type"  : "Zip",
+    "function-handler" : "aspnet",
+    "function-memory-size" : 256,
+    "function-role"        : "arn:aws:iam::311550998766:role/lambda_exec_aspnet",
+    "function-timeout"     : 10,
+    "function-runtime"     : "dotnet6",
+    "function-architecture" : "x86_64",
+    "function-subnets"      : "",
+    "function-security-groups" : "",
+    "tracing-mode"             : "PassThrough",
+    "environment-variables"    : "",
+    "image-tag"                : ""
+}

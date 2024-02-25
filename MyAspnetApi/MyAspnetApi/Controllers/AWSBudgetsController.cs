@@ -122,8 +122,28 @@ namespace MyAspnetApi.Controllers
                     AccountId = _awsId,
                     BudgetName = budgetName
                 });
+                var notificationsResponse = await _budgetsClient.DescribeNotificationsForBudgetAsync(new DescribeNotificationsForBudgetRequest
+                {
+                    AccountId = _awsId,
+                    BudgetName = budgetName
+                });
 
-                return Ok(describeBudgetResponse.Budget);
+                var thresholdAmount = notificationsResponse.Notifications.FirstOrDefault()?.Threshold ?? 0;
+                var budget = new BudgetDto
+                {
+                    BudgetName = describeBudgetResponse.Budget.BudgetName,
+                    BudgetLimit = describeBudgetResponse.Budget.BudgetLimit.Amount,
+                    ActualSpend = describeBudgetResponse.Budget.CalculatedSpend?.ActualSpend.Amount,
+                    ForecastedSpend = describeBudgetResponse.Budget.CalculatedSpend?.ForecastedSpend.Amount,
+                    StartTime = describeBudgetResponse.Budget.TimePeriod.Start,
+                    EndTime = describeBudgetResponse.Budget.TimePeriod.End,
+                    TimeUnit = describeBudgetResponse.Budget.TimeUnit.Value,
+                    LastUpdatedTime = describeBudgetResponse.Budget.LastUpdatedTime,
+                    Threshold = thresholdAmount,
+                    // Thêm các thuộc tính khác nếu cần thiết
+                };
+
+                return Ok(budget);
             }
             catch (Exception ex)
             {
@@ -213,23 +233,34 @@ namespace MyAspnetApi.Controllers
                 {
                     AccountId = _awsId
                 });
+                var budgets = new List<object>();
 
-                var budgets = budgetsResponse.Budgets.Select(b => new
+                foreach (var budget in budgetsResponse.Budgets)
                 {
-                    BudgetName = b.BudgetName,
-                    BudgetLimit = b.BudgetLimit.Amount,
-                    ActualSpend = b.CalculatedSpend?.ActualSpend.Amount,
-                    ForecastedSpend = b.CalculatedSpend?.ForecastedSpend.Amount,
-                    StartTime = b.TimePeriod.Start,
-                    EndTime = b.TimePeriod.End,
-                    TimeUnit = b.TimeUnit.Value,
-                    LastUpdatedTime = b.LastUpdatedTime
-                });
+                    var notificationsResponse = await _budgetsClient.DescribeNotificationsForBudgetAsync(new DescribeNotificationsForBudgetRequest
+                    {
+                        AccountId = _awsId,
+                        BudgetName = budget.BudgetName
+                    });
 
-                return Ok(budgets);
+                    var thresholdAmount = notificationsResponse.Notifications.FirstOrDefault()?.Threshold ?? 0;
 
-                // Xử lý danh sách ngân sách ở đây và trả về
-                return Ok(budgets);
+                    var budgetInfo = new BudgetDto
+                    {
+                        BudgetName = budget.BudgetName,
+                        BudgetLimit = budget.BudgetLimit.Amount,
+                        ActualSpend = budget.CalculatedSpend?.ActualSpend.Amount,
+                        ForecastedSpend = budget.CalculatedSpend?.ForecastedSpend.Amount,
+                        StartTime = budget.TimePeriod.Start,
+                        EndTime = budget.TimePeriod.End,
+                        TimeUnit = budget.TimeUnit.Value,
+                        LastUpdatedTime = budget.LastUpdatedTime,
+                        Threshold = thresholdAmount,
+                    };
+
+                    budgets.Add(budgetInfo);
+                }
+                return Ok(budgets);;
             }
             catch (Exception ex)
             {

@@ -16,8 +16,8 @@ namespace MyAspnetInfrastructure.Repository
     public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity>
     {
         #region property
-        protected readonly string? connectionString;
-        protected MySqlConnection connection;
+            protected readonly string? connectionString;
+            protected MySqlConnection connection;
         #endregion
 
         public BaseRepository(IConfiguration configuration)

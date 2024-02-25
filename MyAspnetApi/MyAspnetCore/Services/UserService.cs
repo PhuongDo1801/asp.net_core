@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using MyAspnetCore.DTO.User;
 using MyAspnetCore.Entities;
 using MyAspnetCore.Exceptions;
+using MyAspnetCore.Helper;
 using MyAspnetCore.Interfaces.Infrastructure;
 using MyAspnetCore.Interfaces.Services;
 using MyAspnetCore.Resources;
@@ -78,6 +79,8 @@ namespace MyAspnetCore.Services
         {
             var passwordHash = await HashPassword(useCreateDto.Password);
             useCreateDto.Password = passwordHash;
+            useCreateDto.AccessKey = CryptoHelper.Encrypt(useCreateDto.AccessKey);
+            useCreateDto.SecretKey = CryptoHelper.Encrypt(useCreateDto.SecretKey);
             var errorsList = await InsertErr(useCreateDto);
 
             if (errorsList.Count > 0)

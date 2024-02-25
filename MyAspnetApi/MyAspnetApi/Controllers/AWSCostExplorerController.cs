@@ -10,6 +10,7 @@ using MyAspnetCore.Entities;
 using Microsoft.AspNetCore.Authorization;
 using MyAspnetCore.Interfaces.Services;
 using Amazon.Budgets;
+using MyAspnetCore.Helper;
 
 namespace MyAspnetApi.Controllers
 {
@@ -28,6 +29,10 @@ namespace MyAspnetApi.Controllers
             _userService = userService;
             Initialize().Wait();
         }
+        /// <summary>
+        /// Khởi tạo thông tin của user
+        /// </summary>
+        /// <returns></returns>
         private async Task Initialize()
         {
             var user = await _userService.GetUserInfo(); ;
@@ -36,12 +41,20 @@ namespace MyAspnetApi.Controllers
                 _costExplorerClient = InitializeClient(user.AccessKey, user.SecretKey);
             }
         }
+        /// <summary>
+        /// Khởi tạo credenttials để sử dụng API
+        /// </summary>
+        /// <param name="accessKey"></param>
+        /// <param name="secretKey"></param>
+        /// <returns></returns>
         private IAmazonCostExplorer InitializeClient(string accessKey, string secretKey)
         {
             if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
             {
+               // var decryptedAccessKey = CryptoHelper.Decrypt(accessKey);
+                //var decryptedSecretKey = CryptoHelper.Decrypt(secretKey);
                 var credentials = new BasicAWSCredentials(accessKey, secretKey);
-                var regionEndpoint = RegionEndpoint.USEast1; // Thay đổi region endpoint tại đây
+                var regionEndpoint = RegionEndpoint.USEast1;
                 return new AmazonCostExplorerClient(credentials, regionEndpoint);
             }
 
