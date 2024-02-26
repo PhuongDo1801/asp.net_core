@@ -16,7 +16,7 @@ namespace MyAspnetApi.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Policy = "User")]
     public class AWSCostExplorerController : ControllerBase
     {
         private IAmazonCostExplorer _costExplorerClient;
