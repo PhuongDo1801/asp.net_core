@@ -4,7 +4,10 @@ using Amazon.Budgets;
 using Amazon.CostAndUsageReport;
 using Amazon.CostExplorer;
 using Amazon.EC2;
+using Amazon.Lambda;
 using Amazon.Pricing;
+using Amazon.RDS;
+using Amazon.S3;
 using Amazon.SavingsPlans;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -61,6 +64,9 @@ builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<AmazonCostExplorerClient>();
 builder.Services.AddAWSService<AmazonBCMDataExportsClient>();
 builder.Services.AddAWSService<AmazonEC2Client>();
+builder.Services.AddAWSService<AmazonS3Client>();
+builder.Services.AddAWSService<AmazonRDSClient>();
+builder.Services.AddAWSService<AmazonLambdaClient>();
 builder.Services.AddAWSService<AmazonBudgetsClient>();
 builder.Services.AddAWSService<AmazonCostAndUsageReportClient>();
 builder.Services.AddAWSService<AmazonPricingClient>();
@@ -109,6 +115,10 @@ builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IServiceTypeRepository, ServiceTypeRepository>();
 builder.Services.AddScoped<IServiceTypeService, ServiceTypeService>();
+builder.Services.AddScoped<IServiceManagerRepository, ServiceManagerRepository>();
+builder.Services.AddScoped<IServiceManagerService, ServiceManagerService>();
+builder.Services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
+builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyAllowedOrigins",
