@@ -131,7 +131,7 @@ namespace MyAspnetApi.Controllers
                 new Claim("AwsId", user.AwsId),
                 new Claim("SecretKey", user.SecretKey),
                 new Claim("AccessKey", user.AccessKey),
-               // new Claim("UserId", user.UserId.ToString()),
+                new Claim("UserId", user.UserId.ToString()),
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(

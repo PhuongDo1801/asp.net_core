@@ -14,7 +14,7 @@ namespace MyAspnetApi.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class EC2instancesController : ControllerBase
     {
         private IAmazonEC2 _ec2client;
@@ -34,6 +34,16 @@ namespace MyAspnetApi.Controllers
             {
                 _ec2client = InitializeClient(user.AccessKey, user.SecretKey);
             }
+            //else
+            //{
+            //    // Nếu không có thông tin từ HttpContext, thử lấy từ localStorage
+            //    var accessKey = _configuration["LocalStorage:AccessKey"];
+            //    var secretKey = _configuration["LocalStorage:SecretKey"];
+            //    if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
+            //    {
+            //        _ec2client = InitializeClient(accessKey, secretKey);
+            //    }
+            //}
         }
         private IAmazonEC2 InitializeClient(string accessKey, string secretKey)
         {

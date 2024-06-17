@@ -79,8 +79,8 @@ namespace MyAspnetCore.Services
         {
             var passwordHash = await HashPassword(useCreateDto.Password);
             useCreateDto.Password = passwordHash;
-            useCreateDto.AccessKey = CryptoHelper.Encrypt(useCreateDto.AccessKey);
-            useCreateDto.SecretKey = CryptoHelper.Encrypt(useCreateDto.SecretKey);
+            //useCreateDto.AccessKey = CryptoHelper.Encrypt(useCreateDto.AccessKey);
+            //useCreateDto.SecretKey = CryptoHelper.Encrypt(useCreateDto.SecretKey);
             var errorsList = await InsertErr(useCreateDto);
 
             if (errorsList.Count > 0)
@@ -168,11 +168,11 @@ namespace MyAspnetCore.Services
                 userInfo.UserName = user.FindFirstValue(ClaimTypes.Name);
                 userInfo.Email = user.FindFirstValue(ClaimTypes.Email);
                 userInfo.Role = user.FindFirstValue(ClaimTypes.Role);
-                //userInfo.UserId = Guid.Parse(user.FindFirstValue("UserId"));
+                userInfo.UserId = Guid.Parse(user.FindFirstValue("UserId"));
                 userInfo.AwsId = user.FindFirstValue("AwsId");
                 userInfo.SecretKey = user.FindFirstValue("SecretKey");
                 userInfo.AccessKey = user.FindFirstValue("AccessKey");
-                //Thêm các thông tin khác tùy thuộc vào cấu trúc claim trong hệ thống của bạn
+                //userInfo.UserId = user.FindFirstValue("UserId");
                 //userInfo.OtherInfo = user.FindFirstValue("OtherClaimType");
             }
 

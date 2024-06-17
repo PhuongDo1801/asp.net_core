@@ -12,7 +12,7 @@ namespace MyAspnetApi.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class S3Controller : ControllerBase
     {
         private readonly IConfiguration _configuration;

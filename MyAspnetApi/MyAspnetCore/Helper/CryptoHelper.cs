@@ -16,10 +16,14 @@ namespace MyAspnetCore.Helper
         public CryptoHelper(IConfiguration configuration)
         {
             _configuration = configuration;
-            _aesKey = _configuration["AppSettings:AesKey"];
+            _aesKey = configuration["AppSettings:AesKey"];
         }
         public static string Encrypt(string textToEncrypt)
         {
+            if (string.IsNullOrEmpty(_aesKey))
+            {
+                throw new InvalidOperationException("AES key is not set.");
+            }
             using (var aesAlg = Aes.Create())
             {
                 aesAlg.Key = Encoding.UTF8.GetBytes(_aesKey);
@@ -43,6 +47,10 @@ namespace MyAspnetCore.Helper
 
         public static string Decrypt(string cipherText)
         {
+            if (string.IsNullOrEmpty(_aesKey))
+            {
+                throw new InvalidOperationException("AES key is not set.");
+            }
             using (var aesAlg = Aes.Create())
             {
                 aesAlg.Key = Encoding.UTF8.GetBytes(_aesKey);

@@ -13,7 +13,7 @@ namespace MyAspnetApi.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class LambdaController : ControllerBase
     {
         private IAmazonLambda _lambdaclient;
@@ -32,6 +32,16 @@ namespace MyAspnetApi.Controllers
             if (user != null)
             {
                 _lambdaclient = InitializeClient(user.AccessKey, user.SecretKey);
+            }
+            else
+            {
+                // Nếu không có thông tin từ HttpContext, thử lấy từ localStorage
+                var accessKey = _configuration["LocalStorage:AccessKey"];
+                var secretKey = _configuration["LocalStorage:SecretKey"];
+                if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
+                {
+                    _lambdaclient = InitializeClient(accessKey, secretKey);
+                }
             }
         }
         private IAmazonLambda InitializeClient(string accessKey, string secretKey)
@@ -187,7 +197,7 @@ namespace MyAspnetApi.Controllers
             }
         }
 
-        [HttpPost("delete")]
+        [HttpDelete("delete")]
         public async Task<IActionResult> DeleteLambdaFunction(string functionName)
         {
             //if (ClientIsNull())

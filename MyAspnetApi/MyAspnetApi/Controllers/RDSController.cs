@@ -12,7 +12,7 @@ namespace MyAspnetApi.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class RDSController : ControllerBase
     {
         private IAmazonRDS _rdsclient;

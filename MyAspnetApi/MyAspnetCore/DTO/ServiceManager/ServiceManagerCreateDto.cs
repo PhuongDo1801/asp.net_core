@@ -8,7 +8,7 @@ namespace MyAspnetCore.DTO.ServiceManager
 {
     public class ServiceManagerCreateDto
     {
-        public Guid Id { get; set; }
+        public Guid ServiceManagerId { get; set; }
         public string ServiceName { get; set; }
         public int Status { get; set; }
     }

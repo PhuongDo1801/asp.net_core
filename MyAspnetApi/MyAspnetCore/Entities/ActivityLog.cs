@@ -8,7 +8,7 @@ namespace MyAspnetCore.Entities
 {
     public class ActivityLog
     {
-        public Guid LogId { get; set; }
+        public Guid ActivityLogId { get; set; }
         public Guid UserId { get; set; }
         public string InstanceId { get; set; }
         public string ServiceName {  get; set; }
