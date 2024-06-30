@@ -7,14 +7,15 @@
     "function-name" : "aspnet",
     "package-type"  : "Zip",
     "function-handler" : "aspnet",
-    "function-memory-size" : 256,
-    "function-role"        : "arn:aws:iam::311550998766:role/lambda_exec_aspnet",
-    "function-timeout"     : 10,
+    "function-memory-size" : 512,
+    "function-role"        : "arn:aws:iam::311550998766:role/lambda_exec_aspnet-0",
+    "function-timeout"     : 20,
     "function-runtime"     : "dotnet6",
     "function-architecture" : "x86_64",
     "function-subnets"      : "",
     "function-security-groups" : "",
     "tracing-mode"             : "PassThrough",
     "environment-variables"    : "",
-    "image-tag"                : ""
+    "image-tag"                : "",
+    "function-description"     : ""
 }
