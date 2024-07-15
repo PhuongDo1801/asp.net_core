@@ -1,5 +1,6 @@
 ﻿using Amazon;
 using Amazon.CostExplorer;
+using Amazon.CostExplorer.Model;
 using Amazon.EC2;
 using Amazon.EC2.Model;
 using Amazon.Runtime;
@@ -14,7 +15,7 @@ namespace MyAspnetApi.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class EC2instancesController : ControllerBase
     {
         private IAmazonEC2 _ec2client;
@@ -101,6 +102,44 @@ namespace MyAspnetApi.Controllers
             }
         }
 
+        [HttpGet("GetEC2InstanceTypeCost")]
+        public async Task<IActionResult> GetEC2InstanceTypeCost(string instanceType)
+        {
+            try
+            {
+                var costExplorerClient = new AmazonCostExplorerClient(); // Khởi tạo client Cost Explorer
+                var today = DateTime.Today;
+                var startDate = new DateTime(today.Year, today.Month, 1).AddMonths(-1); // Thời điểm bắt đầu là đầu tháng trước
+                var endDate = new DateTime(today.Year, today.Month, 1).AddDays(-1); // Thời điểm kết thúc là cuối tháng trước
+
+                var request = new GetCostAndUsageRequest
+                {
+                    TimePeriod = new DateInterval { Start = startDate.ToString("yyyy-MM-dd"), End = endDate.ToString("yyyy-MM-dd") },
+                    Granularity = Granularity.MONTHLY,
+                    Metrics = new List<string> { "UnblendedCost" },
+                    Filter = new Expression
+                    {
+                        Dimensions = new DimensionValues
+                        {
+                            Key = "INSTANCE_TYPE",
+                            Values = new List<string> { instanceType }
+                        }
+                    }
+                };
+
+                var response = await costExplorerClient.GetCostAndUsageAsync(request);
+                var totalCost = response.ResultsByTime.Sum(result => decimal.Parse(result.Total["UnblendedCost"].Amount));
+
+                return Ok(new { InstanceType = instanceType, MonthlyBlendedCost = totalCost });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error retrieving cost: {ex.Message}");
+            }
+        }
+
+
+
         [HttpPost("start")]
         public async Task<IActionResult> StartInstance(string instanceId)
         {
@@ -164,6 +203,33 @@ namespace MyAspnetApi.Controllers
             catch (AmazonEC2Exception ex)
             {
                 return BadRequest($"Error: {ex.ErrorCode}, {ex.Message}");
+            }
+        }
+
+        // GET: api/instancetypes/ec2/t2.micro
+        [HttpGet("ec2/{instanceType}")]
+        public async Task<ActionResult<string>> GetEC2InstanceType(string instanceType)
+        {
+            try
+            {
+                var response = await _ec2client.DescribeInstanceTypesAsync(new DescribeInstanceTypesRequest
+                {
+                    InstanceTypes = new List<string> { instanceType }
+                });
+
+                if (response.InstanceTypes.Count > 0)
+                {
+                    var details = response.InstanceTypes[0]; // Assume only one match
+                    return Ok(details);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error retrieving EC2 instance type: {ex.Message}");
             }
         }
 

@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using MyAspnetCore.Interfaces.Services;
 using Amazon.CostExplorer;
 using Microsoft.AspNetCore.Authorization;
+using System;
 //using Newtonsoft.Json.Linq;
 
 namespace MyAspnetApi.Controllers
@@ -59,7 +60,7 @@ namespace MyAspnetApi.Controllers
         /// <param name="memory"></param>
         /// <returns></returns>
         [HttpGet("EC2forecast")]
-        public async Task<IActionResult> GetEC2PriceForecast([FromQuery] string instanceType, string vCpu, double memory)
+        public async Task<IActionResult> GetEC2PriceForecast([FromQuery] string instanceType, string vCpu, double memory, string operatingSystem)
         {
             try
             {
@@ -92,6 +93,12 @@ namespace MyAspnetApi.Controllers
                             Field = "vcpu",
                             Value = vCpu // Thay đổi số lượng vCPU tại đây
                         },
+                        new Filter
+                        {
+                            Type = "TERM_MATCH",
+                            Field = "operatingSystem",
+                            Value = operatingSystem // Thêm bộ lọc hệ điều hành tại đây
+                        }
                         //new Filter
                         //{
                         //    Type = "TERM_MATCH",
@@ -228,5 +235,99 @@ namespace MyAspnetApi.Controllers
                 return StatusCode(500, new { ErrorMessage = ex.Message });
             }
         }
+
+        [HttpGet("EC2InstancePrice")]
+        public async Task<IActionResult> GetEC2InstancePrice([FromQuery] string instanceType)
+        {
+            try
+            {
+                var response = await _pricingClient.GetProductsAsync(new GetProductsRequest
+                {
+                    ServiceCode = "AmazonEC2",
+                    Filters = new List<Filter>
+                    {
+                        new Filter { Type = "TERM_MATCH", Field = "serviceCode", Value = "AmazonEC2" },
+                        new Filter { Type = "TERM_MATCH", Field = "instanceType", Value = instanceType }
+                    }
+                });
+
+                if (response.PriceList.Count > 0)
+                {
+                    var priceList = response.PriceList[0];
+                    var priceListJson = JToken.Parse(priceList);
+
+                    var terms = priceListJson["terms"]?["OnDemand"];
+                    var termValues = terms?.Values().FirstOrDefault();
+
+                    var priceDimensions = termValues?["priceDimensions"];
+                    var pricePerUnit = priceDimensions?.Values().FirstOrDefault()?["pricePerUnit"]?["USD"]?.Value<string>();
+
+                    if (pricePerUnit != null)
+                    {
+                        var price = decimal.Parse(pricePerUnit);
+
+                        // You can optionally return more information here
+                        var description = priceDimensions?.Values().FirstOrDefault()?["description"]?.Value<string>();
+
+                        return Ok(new { InstanceType = instanceType, PricePerHour = price, Description = description });
+                    }
+                    else
+                    {
+                        return NotFound(new { ErrorMessage = $"Price information not found for instance type {instanceType}" });
+                    }
+                }
+
+                return NotFound(new { ErrorMessage = $"Instance type {instanceType} not found" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error retrieving EC2 instance price for {instanceType}: {ex.Message}");
+                return StatusCode(500, new { ErrorMessage = $"Internal server error: {ex.Message}" });
+            }
+        }
+
+        [HttpGet("RDSInstancePrice")]
+        public async Task<IActionResult> GetRDSInstancePrice([FromQuery] string instanceType)
+        {
+            try
+            {
+                var response = await _pricingClient.GetProductsAsync(new GetProductsRequest
+                {   
+                    ServiceCode = "AmazonRDS",
+                    Filters = new List<Filter>
+            {
+                new Filter { Type = "TERM_MATCH", Field = "instanceType", Value = instanceType }
+            }
+                });
+
+                if (response.PriceList.Count > 0)
+                {
+                    var priceList = response.PriceList[0];
+                    var priceListJson = JToken.Parse(priceList);
+
+                    var terms = priceListJson["terms"]?["OnDemand"];
+                    var termValues = terms?.Values().FirstOrDefault();
+
+                    var priceDimensions = termValues?["priceDimensions"];
+                    var pricePerUnit = priceDimensions?.Values().FirstOrDefault()?["pricePerUnit"]?["USD"]?.Value<string>();
+
+                    if (!string.IsNullOrEmpty(pricePerUnit))
+                    {
+                        var price = decimal.Parse(pricePerUnit);
+                        var description = priceDimensions?.Values().FirstOrDefault()?["description"]?.Value<string>();
+
+                        return Ok(new { InstanceType = instanceType, PricePerHour = price, Description = description });
+                    }
+                }
+
+                return NotFound(new { ErrorMessage = $"Price information not found for instance type {instanceType}" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error retrieving RDS instance price for {instanceType}: {ex.Message}");
+                return StatusCode(500, new { ErrorMessage = $"Internal server error: {ex.Message}" });
+            }
+        }
+
     }
 }
